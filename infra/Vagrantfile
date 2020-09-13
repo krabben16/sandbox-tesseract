@@ -1,0 +1,76 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.box = "centos/7"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  config.vm.provision "shell", inline: <<-SHELL
+    yum update -y
+
+    # 必要なライブラリをインストール
+    yum install -y autoconf automake libtool
+    yum install -y libpng-devel libjpeg-devel libtiff-devel zlib-devel
+    yum install -y libicu-devel
+    yum install -y pango-devel
+
+    yum install -y wget
+    yum install -y gcc gcc-c++
+
+    # tar options
+    # -x, --extract, --get       extract files from an archive
+    # -z, --gzip, --gunzip, --ungzip   filter the archive through gzip
+    # -v, --verbose              verbosely list files processed
+    # -f, --file=ARCHIVE         use archive file or device ARCHIVE
+
+    # http://site.icu-project.org/download
+    # https://github.com/unicode-org/icu/releases/tag/release-56-2
+    cd /usr/local/src/
+    wget https://github.com/unicode-org/icu/releases/download/release-56-2/icu4c-56_2-src.tgz
+    tar xzvf icu4c-56_2-src.tgz
+    cd icu/source/
+    ./configure
+    make
+    make install
+
+    # http://www.leptonica.org/download.html
+    # https://github.com/DanBloomberg/leptonica/releases/tag/1.74.4
+    cd /usr/local/src/
+    wget https://github.com/DanBloomberg/leptonica/releases/download/1.74.4/leptonica-1.74.4.tar.gz
+    tar xzvf leptonica-1.74.4.tar.gz
+    cd leptonica-1.74.4
+    ./configure
+    make
+    make install
+
+    # tesseract-ocrと辞書をインストール
+    yum install -y git
+
+    cd /usr/local/src/
+    git clone https://github.com/tesseract-ocr/tesseract.git
+    cd tesseract
+    git checkout 3.04
+    ./autogen.sh
+    ./configure
+    make
+    make install
+    ldconfig
+
+    make training
+    make training-install
+  SHELL
+end
