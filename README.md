@@ -27,7 +27,7 @@ sudo cp /vagrant_data/jpn.traineddata /usr/local/src/tesseract/tessdata/jpn.trai
 tesseract /vagrant_data/Tesseract_OCR_logo.png out -l eng
 ```
 
-## Link
+# Link
 
 - https://qiita.com/hatahata/items/4daddebb5e84ea575332
 - https://github.com/tesseract-ocr/tessdata
